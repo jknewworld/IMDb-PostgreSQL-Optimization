@@ -1,0 +1,41 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: imdb-postgres
+    restart: unless-stopped
+
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-imdb}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Create .env and set POSTGRES_PASSWORD}
+      PGDATA: /var/lib/postgresql/data/pgdata
+
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./sql/queue_functions.sql:/docker-entrypoint-initdb.d/02-queue-functions.sql:ro
+      - ./:/project:ro
+
+    shm_size: "${POSTGRES_SHM_SIZE:-512mb}"
+    stop_grace_period: 1m
+
+    command:
+      - postgres
+      - -c
+      - track_io_timing=on
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+
+volumes:
+  pgdata:
+    external: true
+    name: imdb-postgres-data

@@ -1,0 +1,21 @@
+# Secrets / local configuration
+.env
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Local data and logs
+data/
+logs/
+
+# Benchmark outputs generated locally
+benchmark-results/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
